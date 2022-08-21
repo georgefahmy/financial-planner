@@ -15,14 +15,14 @@ tab_group = sg.TabGroup(
             sg.Tab(
                 "George",
                 [
-                    person_tab(),
+                    person_tab("George"),
                 ],
                 key="George",
             ),
             sg.Tab(
                 "Britney",
                 [
-                    person_tab(),
+                    person_tab("Britney"),
                 ],
                 key="Britney",
             ),
