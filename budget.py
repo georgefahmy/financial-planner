@@ -6,6 +6,7 @@ import os
 import sys
 import base64
 from make_database import make_database
+from sql_functions import *
 
 try:
     wd = sys._MEIPASS
@@ -17,7 +18,11 @@ make_database(db_file)
 
 default_font = ("Arial", 14)
 
-layout = [[]]
+expenses = read_expenses()
+assets = read_assets()
+liabilities = read_liabilities()
+
+layout = [[sg.Button("Add Expense", key="add_expense", font=default_font)]]
 
 window = sg.Window(
     "Financial Planner PRO",
@@ -33,6 +38,15 @@ while True:
 
     if event:
         print(event, values)
+
+    if event == "add_expense":
+        expense = sg.popup_get_text("Expense Name")
+        amount = sg.popup_get_text("Amount")
+        expense_info = (expense, float(amount))
+        success = add_expense(db_file, expense_info)
+        expenses = read_expenses()
+        for expense in expenses:
+            print(expense[1], expense[2])
 
     if event in (None, "Quit", sg.WIN_CLOSED):
         window.close()

@@ -8,7 +8,6 @@ try:
 except AttributeError:
     wd = os.getcwd()
 
-print(wd)
 db_file = os.path.join(wd, "databse.db")
 
 
@@ -18,9 +17,7 @@ def make_database(db_file=db_file):
         (
             id integer PRIMARY KEY,
             expense text NOT NULL,
-            amount float,
-            recurring bool DEFAULT 1,
-            date text
+            amount float
         );
     """
 

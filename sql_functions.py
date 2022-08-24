@@ -26,14 +26,14 @@ def create_connection(db_file=db_file):
     return conn
 
 
-def read_assets():
+def read_expenses():
     conn = create_connection(db_file)
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM assets")
+    cur.execute(f"SELECT * FROM expenses")
     return cur.fetchall()
 
 
-def read_expenses():
+def read_assets():
     conn = create_connection(db_file)
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM assets")
@@ -43,5 +43,41 @@ def read_expenses():
 def read_liabilities():
     conn = create_connection(db_file)
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM assets")
+    cur.execute(f"SELECT * FROM liabilities")
     return cur.fetchall()
+
+
+def add_expense(db_file, expense_info):
+    conn = create_connection(db_file)
+    cur = conn.cursor()
+    sql = f"""
+        INSERT OR IGNORE INTO expenses (expense, amount) VALUES(?,?)
+        """
+    cur.execute(sql, expense_info)
+    conn.commit()
+    conn.close()
+    return
+
+
+def add_asset(db_file, asset_info):
+    conn = create_connection(db_file)
+    cur = conn.cursor()
+    sql = f"""
+        INSERT OR IGNORE INTO assets (person, asset, amount, date) VALUES(?,?,?,?)
+        """
+    cur.execute(sql, asset_info)
+    conn.commit()
+    conn.close()
+    return
+
+
+def add_liability(db_file, liability_info):
+    conn = create_connection(db_file)
+    cur = conn.cursor()
+    sql = f"""
+        INSERT OR IGNORE INTO assets (person, liability, amount, date) VALUES(?,?,?,?)
+        """
+    cur.execute(sql, liability_info)
+    conn.commit()
+    conn.close()
+    return
