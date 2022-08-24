@@ -1,7 +1,13 @@
 import PySimpleGUI as sg
 
 
-def person_tab(person):
+def add_expense_row():
+    pass
+
+
+def add_person_tab():
+    name = sg.popup_get_text("Enter Name:")
+
     default_font = ("Arial", 14)
     inputs_tab = [
         sg.Tab(
@@ -12,7 +18,7 @@ def person_tab(person):
                         "Enter Asset Name",
                         size=(15, 1),
                     ),
-                    sg.Input(size=(20, 1), font=default_font),
+                    sg.Input(size=(20, 1), font=default_font, key=f"asset_{0}"),
                 ]
             ],
         ),
@@ -24,7 +30,7 @@ def person_tab(person):
                         "Enter Asset Name",
                         size=(15, 1),
                     ),
-                    sg.Input(size=(20, 1), font=default_font),
+                    sg.Input(size=(20, 1), font=default_font, key=f"liability_{0}"),
                 ]
             ],
         ),
@@ -52,14 +58,14 @@ def person_tab(person):
                                     "Enter Expense:",
                                     size=(15, 1),
                                 ),
-                                sg.Input(size=(20, 1), font=default_font),
+                                sg.Input(size=(20, 1), font=default_font, key=f"expense_{0}"),
                             ],
                             [
                                 sg.Text(
                                     "Enter Expense:",
                                     size=(15, 1),
                                 ),
-                                sg.Input(size=(20, 1), font=default_font),
+                                sg.Input(size=(20, 1), font=default_font, key=f"expense_{1}"),
                             ],
                         ],
                     )
@@ -67,18 +73,24 @@ def person_tab(person):
             ],
         ),
     ]
-
-    return [
-        sg.TabGroup(
-            layout=[
-                inputs_tab,
+    person_tab = sg.Tab(
+        name,
+        layout=[
+            [
+                sg.TabGroup(
+                    layout=[
+                        inputs_tab,
+                    ],
+                    tab_location="topleft",
+                    tab_background_color="darkblue",
+                    title_color="white",
+                    selected_background_color="teal",
+                    selected_title_color="white",
+                    expand_y=True,
+                    key=name,
+                ),
             ],
-            tab_location="topleft",
-            tab_background_color="darkblue",
-            title_color="white",
-            selected_background_color="teal",
-            selected_title_color="white",
-            expand_y=True,
-            key=person,
-        ),
-    ]
+        ],
+    )
+
+    return person_tab

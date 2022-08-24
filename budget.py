@@ -1,46 +1,23 @@
 import PySimpleGUI as sg
+import sqlite3 as s
 import datetime
 import json
 import os
 import sys
 import base64
-from person_tab_layout import person_tab
+from make_database import make_database
+
+try:
+    wd = sys._MEIPASS
+except AttributeError:
+    wd = os.getcwd()
+
+db_file = os.path.join(wd, "database.db")
+make_database(db_file)
 
 default_font = ("Arial", 14)
 
-
-tab_group = sg.TabGroup(
-    layout=[
-        [
-            sg.Tab(
-                "George",
-                [
-                    person_tab("George"),
-                ],
-                key="George",
-            ),
-            sg.Tab(
-                "Britney",
-                [
-                    person_tab("Britney"),
-                ],
-                key="Britney",
-            ),
-        ]
-    ],
-    tab_location="topleft",
-    tab_background_color="darkblue",
-    title_color="white",
-    selected_background_color="teal",
-    selected_title_color="white",
-    expand_y=True,
-)
-layout = [
-    [
-        [tab_group],
-    ],
-    [sg.Quit()],
-]
+layout = [[]]
 
 window = sg.Window(
     "Financial Planner PRO",
@@ -50,6 +27,7 @@ window = sg.Window(
     finalize=True,
     size=(600, 400),
 )
+
 while True:
     event, values = window.Read()
 
