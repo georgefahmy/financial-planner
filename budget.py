@@ -18,11 +18,90 @@ make_database(db_file)
 
 default_font = ("Arial", 14)
 
-expenses = read_expenses()
-assets = read_assets()
-liabilities = read_liabilities()
+expenses = sorted(read_expenses(), key=lambda x: x[2], reverse=True)
 
-layout = [[sg.Button("Add Expense", key="add_expense", font=default_font)]]
+
+expense_name_list = "\n".join([f"{expense[1]}:" for expense in expenses])
+expense_amount_list = "\n".join(["${:,.2f}".format(expense[2]) for expense in expenses])
+total_expenses = "${:,.2f}".format(sum([expense[2] for expense in expenses]))
+
+expense_tab_layout = [
+    [
+        sg.Text(expense_name_list, font=default_font, key="expense_name_list"),
+        sg.Text("", expand_x=True),
+        sg.Text(
+            expense_amount_list,
+            font=default_font,
+            justification="r",
+            key="expense_amount_list",
+        ),
+    ],
+    [
+        sg.HorizontalSeparator(),
+    ],
+    [
+        sg.Text("Total:", font=default_font),
+        sg.Text("", expand_x=True),
+        sg.Text(
+            total_expenses,
+            font=default_font,
+            key="total_expenses",
+        ),
+    ],
+]
+
+expense_tab = sg.Tab("Expenses", layout=expense_tab_layout)
+
+assets = read_assets()
+
+
+asset_name_list = "\n".join([f"{asset[2]}:" for asset in assets])
+asset_amount_list = "\n".join(["${:,.2f}".format(asset[3]) for asset in assets])
+total_assets = "${:,.2f}".format(sum([asset[3] for asset in assets]))
+
+asset_tab_layout = [
+    [
+        sg.Text(asset_name_list, font=default_font, key="asset_name_list"),
+        sg.Text("", expand_x=True),
+        sg.Text(
+            asset_amount_list,
+            font=default_font,
+            justification="r",
+            key="asset_amount_list",
+        ),
+    ],
+    [
+        sg.HorizontalSeparator(),
+    ],
+    [
+        sg.Text("Total:", font=default_font),
+        sg.Text("", expand_x=True),
+        sg.Text(
+            total_assets,
+            font=default_font,
+            key="total_assets",
+        ),
+    ],
+]
+
+asset_tab = sg.Tab("Assets", layout=asset_tab_layout)
+
+liabilities = read_liabilities()
+tabs = sg.TabGroup(layout=[[expense_tab], [asset_tab]])
+
+menu_bar_layout = [
+    ["&File", ["Save", "Load Database", "Export Database"]],
+    ["Expenses", ["New Expense", "!Delete Expense", "View All Expenses"]],
+    ["Assets", ["New Asset", "!Delete Asset", "View All Assets"]],
+    ["Liabilities", ["New Liability", "!Delete Liability", "View All Liabilities"]],
+    ["Reports", ["Budget Report", "Performance Chart"]],
+    ["Help", ["!About", "!How To", "!Feedback"]],
+]
+
+layout = [
+    [sg.Menu(menu_bar_layout, font=("Arial", "12"), key="-MENU-")],
+    [tabs],
+]
 
 window = sg.Window(
     "Financial Planner PRO",
@@ -39,14 +118,23 @@ while True:
     if event:
         print(event, values)
 
-    if event == "add_expense":
+    if event == "New Expense":
         expense = sg.popup_get_text("Expense Name")
+        if not expense:
+            continue
         amount = sg.popup_get_text("Amount")
+        if not amount:
+            continue
         expense_info = (expense, float(amount))
         success = add_expense(db_file, expense_info)
         expenses = read_expenses()
-        for expense in expenses:
-            print(expense[1], expense[2])
+        expense_name_list = "\n".join([f"{expense[1]}:" for expense in expenses])
+        expense_amount_list = "\n".join(["${:,.2f}".format(expense[2]) for expense in expenses])
+        total_expenses = "${:,.2f}".format(sum([expense[2] for expense in expenses]))
+
+        window["expense_name_list"].update(value=expense_name_list)
+        window["expense_amount_list"].update(value=expense_amount_list)
+        window["total_expenses"].update(value=total_expenses)
 
     if event in (None, "Quit", sg.WIN_CLOSED):
         window.close()
