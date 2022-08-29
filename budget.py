@@ -5,6 +5,8 @@ import json
 import os
 import sys
 import base64
+
+from string import capwords
 from make_database import make_database
 from sql_functions import *
 
@@ -25,27 +27,30 @@ expense_name_list = "\n".join([f"{expense[1]}:" for expense in expenses])
 expense_amount_list = "\n".join(["${:,.2f}".format(expense[2]) for expense in expenses])
 total_expenses = "${:,.2f}".format(sum([expense[2] for expense in expenses]))
 
-expense_tab_layout = [
+expense_frame_layout = [
     [
         sg.Frame(
             "",
             layout=[
                 [
-                    sg.Text("New Expense: ", font=default_font),
-                    sg.Input("", size=(10, 1), font=default_font, key="new_expense_name"),
+                    sg.Text("Expense: ", font=default_font),
+                    sg.Input("", size=(15, 1), font=default_font, key="new_expense_name"),
                     sg.Text("Amount: ", font=default_font),
-                    sg.Input("", size=(10, 1), font=default_font, key="new_expense_amount"),
+                    sg.Input("", size=(8, 1), font=default_font, key="new_expense_amount"),
                     sg.Button(
                         "Submit", font=default_font, key="submit_new_expense", bind_return_key=True
                     ),
                 ]
             ],
+            size=(440, 40),
         ),
     ],
     [
         sg.Frame(
             "",
             layout=[
+                [sg.Text("Recurring Expenses", font=default_font)],
+                [sg.HorizontalSeparator()],
                 [
                     sg.Column(
                         [
@@ -56,7 +61,7 @@ expense_tab_layout = [
                                     key="expense_name_list",
                                     expand_x=True,
                                 ),
-                                sg.Text("", expand_x=True),
+                                sg.Text("", size=(22, 1), expand_x=True),
                                 sg.Text(
                                     expense_amount_list,
                                     font=default_font,
@@ -68,114 +73,47 @@ expense_tab_layout = [
                         ],
                         scrollable=True,
                         vertical_scroll_only=True,
+                        expand_y=True,
+                        size=(440, 580),
                     ),
-                ]
-            ],
-        )
-    ],
-    [
-        sg.HorizontalSeparator(),
-    ],
-    [
-        sg.Text("Total:", font=default_font),
-        sg.Text("", expand_x=True),
-        sg.Text(
-            total_expenses,
-            font=default_font,
-            key="total_expenses",
-        ),
-    ],
-]
-
-expense_tab = sg.Tab("Expenses", layout=expense_tab_layout)
-
-assets = read_assets()
-
-
-asset_name_list = "\n".join([f"{asset[2]}:" for asset in assets])
-asset_amount_list = "\n".join(["${:,.2f}".format(asset[3]) for asset in assets])
-total_assets = "${:,.2f}".format(sum([asset[3] for asset in assets]))
-
-asset_tab_layout = [
-    [
-        sg.Frame(
-            "",
-            layout=[
-                [
-                    sg.Text("New Asset: ", font=default_font),
-                    sg.Input("", size=(10, 1), font=default_font, key="new_asset_name"),
-                    sg.Text("Amount: ", font=default_font),
-                    sg.Input("", size=(10, 1), font=default_font, key="new_asset_amount"),
-                    sg.Button(
-                        "Submit", font=default_font, key="submit_new_asset", bind_return_key=True
-                    ),
-                ]
-            ],
-        ),
-    ],
-    [
-        sg.Frame(
-            "",
-            layout=[
+                ],
+                [sg.HorizontalSeparator()],
                 [
                     sg.Column(
                         [
                             [
                                 sg.Text(
-                                    asset_name_list,
+                                    "Total:",
                                     font=default_font,
-                                    key="asset_name_list",
                                     expand_x=True,
                                 ),
                                 sg.Text("", expand_x=True),
                                 sg.Text(
-                                    asset_amount_list,
+                                    total_expenses,
                                     font=default_font,
-                                    justification="r",
+                                    key="total_expenses",
                                     expand_x=True,
-                                    key="asset_amount_list",
                                 ),
                             ],
                         ],
-                        scrollable=True,
-                        vertical_scroll_only=True,
+                        size=(440, 45),
+                        expand_x=True,
                     ),
-                ]
+                ],
             ],
+            size=(440, 730),
         )
     ],
-    [
-        sg.HorizontalSeparator(),
-    ],
-    [
-        sg.Text("Total:", font=default_font),
-        sg.Text("", expand_x=True),
-        sg.Text(
-            total_assets,
-            font=default_font,
-            key="total_assets",
-        ),
-    ],
 ]
-
-asset_tab = sg.Tab("Assets", layout=asset_tab_layout)
-
-liabilities = read_liabilities()
-tabs = sg.TabGroup(layout=[[expense_tab], [asset_tab]])
 
 menu_bar_layout = [
     [
         "&File",
         [
-            "Save",
             "Load Database",
             "Export Database",
-            "Expenses",
-            ["New Expense", "!Delete Expense", "View All Expenses"],
-            "Assets",
-            ["New Asset", "!Delete Asset", "View All Assets"],
-            "Liabilities",
-            ["New Liability", "!Delete Liability", "View All Liabilities"],
+            "New Person",
+            ("Expenses", ["View All Expenses", "!Delete Expense"]),
         ],
     ],
     ["Reports", ["Budget Report", "Performance Chart"]],
@@ -184,8 +122,7 @@ menu_bar_layout = [
 
 layout = [
     [sg.Menu(menu_bar_layout, font=("Arial", "12"), key="-MENU-")],
-    [tabs],
-    # [net_worth_frame],
+    [expense_frame_layout],
 ]
 
 window = sg.Window(
@@ -194,7 +131,7 @@ window = sg.Window(
     element_justification="top",
     resizable=True,
     finalize=True,
-    size=(600, 400),
+    size=(1250, 730),
 )
 
 while True:
@@ -203,9 +140,15 @@ while True:
     if event:
         print(event, values)
 
+    if event == "New Person":
+        person = capwords(sg.popup_get_text("Enter new person's name"))
+        create_person_table(person)
+
     if event == "submit_new_expense":
         expense = values["new_expense_name"]
         amount = values["new_expense_amount"]
+        if not expense or not amount:
+            continue
         expense_info = (expense, float(amount))
         success = add_expense(db_file, expense_info)
         expenses = sorted(read_expenses(), key=lambda x: x[2], reverse=True)

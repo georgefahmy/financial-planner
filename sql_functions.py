@@ -26,6 +26,28 @@ def create_connection(db_file=db_file):
     return conn
 
 
+def create_person_table(person):
+    create_person_table = f"""
+        CREATE TABLE IF NOT EXISTS {person}
+        (
+            id integer PRIMARY KEY,
+            asset text,
+            liability text,
+            amount float,
+            date text
+        );
+    """
+
+    conn = create_connection(db_file)
+    cur = conn.cursor()
+
+    if conn:
+        cur.execute(create_person_table)
+        conn.commit()
+    else:
+        print("Error")
+
+
 def read_expenses():
     conn = create_connection(db_file)
     cur = conn.cursor()
