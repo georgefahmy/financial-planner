@@ -21,7 +21,7 @@ make_database(db_file)
 default_font = ("Arial", 14)
 
 expenses = sorted(read_expenses(), key=lambda x: x[2], reverse=True)
-
+available_people = read_available_people()
 
 expense_name_list = "\n".join([f"{expense[1]}:" for expense in expenses])
 expense_amount_list = "\n".join(["${:,.2f}".format(expense[2]) for expense in expenses])
@@ -113,6 +113,7 @@ menu_bar_layout = [
             "Load Database",
             "Export Database",
             "New Person",
+            "Read Person",
             ("Expenses", ["View All Expenses", "!Delete Expense"]),
         ],
     ],
@@ -143,6 +144,14 @@ while True:
     if event == "New Person":
         person = capwords(sg.popup_get_text("Enter new person's name"))
         create_person_table(person)
+        person_info = read_person(person)
+
+    if event == "Read Person":
+        available_people = read_available_people()
+        if len(available_people) == 1:
+            person = available_people[0]
+
+        person_info = read_person(person)
 
     if event == "submit_new_expense":
         expense = values["new_expense_name"]
